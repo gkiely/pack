@@ -103,6 +103,23 @@
         Every time you run <code>pack</code>, it creates a new deployment. Old deployments are put to sleep and deleted after 30 days of inactivity.
       </p>
 
+      <h2>How does this compare to Vercel, Netlify, Cloudflare Pages, Fly, Railway, or Heroku?</h2>
+      <p>Those are managed platforms.</p>
+      <p>
+        <code>pack</code> gives you a similar deploy experience on your own server.
+        You bring the VPS; it handles deploys, HTTPS, port routing, and inactive deployments.
+      </p>
+
+      <h2>Why not Dokku, Coolify, or CapRover?</h2>
+      <p>Those are broader self-hosted platforms. They build apps with Dockerfiles or Buildpacks and run them in containers.</p>
+      <!-- <p>
+        <code>pack</code> is intentionally smaller: single-file executables, one-command deploys,
+        automatic port pooling, and inactive deployments that wake on request.
+      </p> -->
+      <p>
+        <code>pack</code> is intentionally smaller. It builds your app into a single-file executable, deploys it to your server, gives each deployment a persistent HTTPS URL, and handles ports, routing, and inactive deployments.
+      </p>
+
       <h2>Instances</h2>
       <a class="view-link" href="/instances/">
         <code>https://pack.sh/instances/</code>
