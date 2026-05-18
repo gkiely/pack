@@ -31,6 +31,16 @@ if [ -z "$release_domain" ]; then
   echo "release domain is required" >&2
   exit 1
 fi
+case "$deploy_host" in
+  *[!a-zA-Z0-9@._:-]*|*@|@*|*::*|"") echo "invalid deploy host" >&2; exit 1 ;;
+esac
+case "$release_domain" in
+  *[!a-zA-Z0-9.-]*|.*|*..*|*.|"") echo "invalid release domain" >&2; exit 1 ;;
+esac
+
+shell_quote() {
+  printf "'%s'" "$(printf "%s" "$1" | sed "s/'/'\\\\''/g")"
+}
 
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 arch="$(uname -m)"
@@ -58,11 +68,14 @@ mv "$tmp" "$install_dir/pack"
 
 echo "installed pack to $install_dir/pack"
 
-config_line="export PATH=\"$install_dir:\$PATH\""
+quoted_install_dir="$(shell_quote "$install_dir")"
+quoted_deploy_host="$(shell_quote "$deploy_host")"
+quoted_release_domain="$(shell_quote "$release_domain")"
+config_line="export PATH=$quoted_install_dir:\$PATH"
 deploy_host_line=""
 release_domain_line=""
-[ -n "$deploy_host" ] && deploy_host_line="export PACK_DEPLOY_HOST=\"$deploy_host\""
-[ -n "$release_domain" ] && release_domain_line="export PACK_RELEASE_DOMAIN=\"$release_domain\""
+[ -n "$deploy_host" ] && deploy_host_line="export PACK_DEPLOY_HOST=$quoted_deploy_host"
+[ -n "$release_domain" ] && release_domain_line="export PACK_RELEASE_DOMAIN=$quoted_release_domain"
 refresh_command=""
 path_line_needed=1
 case ":$PATH:" in
@@ -120,10 +133,10 @@ case "$(basename "${SHELL:-}")" in
           printf "%s\n" "$fish_line"
         fi
         if [ -n "$deploy_host" ] && ! grep -Fq "PACK_DEPLOY_HOST" "$shell_config"; then
-          printf "set -gx PACK_DEPLOY_HOST %s\n" "$deploy_host"
+          printf "set -gx PACK_DEPLOY_HOST %s\n" "$quoted_deploy_host"
         fi
         if [ -n "$release_domain" ] && ! grep -Fq "PACK_RELEASE_DOMAIN" "$shell_config"; then
-          printf "set -gx PACK_RELEASE_DOMAIN %s\n" "$release_domain"
+          printf "set -gx PACK_RELEASE_DOMAIN %s\n" "$quoted_release_domain"
         fi
       } >> "$shell_config"
       echo "updated pack shell config in $shell_config"

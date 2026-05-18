@@ -10,8 +10,9 @@ On a new Linux server:
 curl -fsSL https://pack.sh/server.sh | sudo sh
 ```
 
-The setup script asks for your app domain and DNS API key, installs the host
-dependencies, configures Caddy, and starts the pack supervisor.
+The setup script asks for your app domain, DNS provider, and DNS API key,
+installs the host dependencies, configures Caddy, and starts the pack
+supervisor.
 
 ## Local install
 

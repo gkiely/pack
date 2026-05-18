@@ -6,6 +6,7 @@ test("createBootstrapScript installs host dependencies and helpers", () => {
 
   expect(script).toContain("apt-get install -y rsync caddy curl ca-certificates sudo golang-go");
   expect(script).toContain("github.com/caddy-dns/vultr");
+  expect(script).toContain("github.com/caddy-dns/digitalocean");
   expect(script).not.toContain("bun.sh/install");
   expect(script).toContain("useradd --system --create-home --shell /bin/bash pack");
   expect(script).toContain("usermod -a -G pack caddy");
@@ -42,19 +43,26 @@ test("createBootstrapScript helper scripts validate names and write expected fil
   expect(script).toContain("UMask=0027");
   expect(script).toContain("mkdir -p /var/pack/apps /run/pack/releases /run/pack/ports /etc/pack /etc/caddy/conf.d /etc/caddy/routes.d");
   expect(script).toContain('pack_domain="${PACK_DOMAIN:-}"');
+  expect(script).toContain('dns_provider="${PACK_DNS_PROVIDER:-}"');
+  expect(script).toContain("DNS provider for TLS certificates [vultr/digitalocean]:");
+  expect(script).toContain('do) dns_provider="digitalocean"');
   expect(script).toContain("Domain for pack apps, like example.com:");
   expect(script).toContain('read -r pack_domain < /dev/tty');
   expect(script).toContain('api_key="${API_KEY:-}"');
-  expect(script).toContain("Vultr API key for DNS certificates:");
+  expect(script).toContain("DNS API key for TLS certificates:");
   expect(script).toContain('read -r api_key < /dev/tty');
-  expect(script).toContain("printf 'VULTR_API_KEY=%s\\n' \"$api_key\"");
+  expect(script).toContain('printf \'%s=%s\\n\' "$caddy_dns_env_name" "$api_key"');
   expect(script).toContain('case "$pack_domain" in');
   expect(script).toContain('echo "invalid domain"');
   expect(script).toContain("EnvironmentFile=-/etc/pack/host.env");
   expect(script).not.toContain("/var/pack/baselines");
   expect(script).not.toContain("trusted-token");
   expect(script).toContain("ExecStart=/usr/bin/caddy run --config /etc/caddy/Caddyfile");
-  expect(script).toContain("dns vultr {env.VULTR_API_KEY}");
+  expect(script).toContain("caddy_dns_provider=\"vultr\"");
+  expect(script).toContain("caddy_dns_provider=\"digitalocean\"");
+  expect(script).toContain("caddy_dns_env_name=\"VULTR_API_KEY\"");
+  expect(script).toContain("caddy_dns_env_name=\"DIGITALOCEAN_API_TOKEN\"");
+  expect(script).toContain('dns $caddy_dns_provider {env.$caddy_dns_env_name}');
   expect(script).toContain("resolvers 1.1.1.1 8.8.8.8");
   expect(script).toContain("propagation_timeout -1");
   expect(script).toContain("*.$pack_domain {");

@@ -34,7 +34,7 @@ A     *.example.com    YOUR_SERVER_IPV4</code></pre>
       <p>The server uses Caddy with Vultr DNS for wildcard TLS certificates.</p>
 
       <h2>4. Run server install</h2>
-      <pre><code>curl -fsSL https://pack.sh/server.sh | sudo sh</code></pre>
+      <pre><code>curl -fsSL https://pack.sh/server.sh | sudo PACK_DNS_PROVIDER=vultr sh</code></pre>
 
       <h2>5. Install locally</h2>
       <pre><code>curl -fsSL https://pack.sh/install.sh | sh</code></pre>

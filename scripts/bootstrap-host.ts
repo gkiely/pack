@@ -105,13 +105,29 @@ set -eu
 
 export DEBIAN_FRONTEND=noninteractive
 ${domainPrompt}
+dns_provider="\${PACK_DNS_PROVIDER:-}"
+if [ -z "$dns_provider" ]; then
+  if [ ! -r /dev/tty ]; then
+    echo "PACK_DNS_PROVIDER is required when setup is not attached to a terminal" >&2
+    exit 1
+  fi
+  printf "DNS provider for TLS certificates [vultr/digitalocean]: " > /dev/tty
+  read -r dns_provider < /dev/tty
+fi
+case "$dns_provider" in
+  vultr|digitalocean) ;;
+  do) dns_provider="digitalocean" ;;
+  "") echo "DNS provider is required" >&2; exit 1 ;;
+  *) echo "unsupported DNS provider: $dns_provider" >&2; exit 1 ;;
+esac
+
 api_key="\${API_KEY:-}"
 if [ -z "$api_key" ]; then
   if [ ! -r /dev/tty ]; then
     echo "API_KEY is required when setup is not attached to a terminal" >&2
     exit 1
   fi
-  printf "Vultr API key for DNS certificates: " > /dev/tty
+  printf "DNS API key for TLS certificates: " > /dev/tty
   stty -echo < /dev/tty 2>/dev/null || true
   read -r api_key < /dev/tty
   stty echo < /dev/tty 2>/dev/null || true
@@ -124,14 +140,28 @@ fi
 case "$pack_domain" in
   *[!a-zA-Z0-9.-]*|.*|*..*|*.|"") echo "invalid domain" >&2; exit 1 ;;
 esac
+case "$dns_provider" in
+  vultr)
+    caddy_dns_module="github.com/caddy-dns/vultr"
+    caddy_dns_module_name="dns.providers.vultr"
+    caddy_dns_provider="vultr"
+    caddy_dns_env_name="VULTR_API_KEY"
+    ;;
+  digitalocean)
+    caddy_dns_module="github.com/caddy-dns/digitalocean"
+    caddy_dns_module_name="dns.providers.digitalocean"
+    caddy_dns_provider="digitalocean"
+    caddy_dns_env_name="DIGITALOCEAN_API_TOKEN"
+    ;;
+esac
 
 apt-get update
 apt-get install -y rsync caddy curl ca-certificates sudo golang-go
 
-if ! caddy list-modules | grep -q '^dns.providers.vultr$'; then
+if ! caddy list-modules | grep -q "^$caddy_dns_module_name$"; then
   GOBIN=/usr/local/bin go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
-  /usr/local/bin/xcaddy build --with github.com/caddy-dns/vultr --output /tmp/caddy-vultr
-  install -m 0755 /tmp/caddy-vultr /usr/bin/caddy
+  /usr/local/bin/xcaddy build --with "$caddy_dns_module" --output /tmp/caddy-pack
+  install -m 0755 /tmp/caddy-pack /usr/bin/caddy
 fi
 
 if command -v ufw >/dev/null 2>&1; then
@@ -172,7 +202,7 @@ fi
 mkdir -p /var/pack/apps /run/pack/releases /run/pack/ports /etc/pack /etc/caddy/conf.d /etc/caddy/routes.d /home/pack/.ssh
 chown -R pack:pack /var/pack /home/pack/.ssh
 chmod 0700 /home/pack/.ssh
-printf 'VULTR_API_KEY=%s\\n' "$api_key" > /etc/pack/host.env
+printf '%s=%s\\n' "$caddy_dns_env_name" "$api_key" > /etc/pack/host.env
 chmod 0600 /etc/pack/host.env
 
 if [ -f /root/.ssh/authorized_keys ] && [ ! -f /home/pack/.ssh/authorized_keys ]; then
@@ -194,7 +224,7 @@ import /etc/caddy/conf.d/*.caddy
 
 *.$pack_domain {
   tls {
-    dns vultr {env.VULTR_API_KEY}
+    dns $caddy_dns_provider {env.$caddy_dns_env_name}
     resolvers 1.1.1.1 8.8.8.8
     propagation_timeout -1
   }

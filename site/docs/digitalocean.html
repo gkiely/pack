@@ -30,11 +30,11 @@
       <pre><code>A     example.com      YOUR_DROPLET_IPV4
 A     *.example.com    YOUR_DROPLET_IPV4</code></pre>
 
-      <h2>3. TLS DNS challenge</h2>
-      <p>The current setup script installs Caddy with the Vultr DNS plugin. For DigitalOcean, either manage DNS at Vultr for now, or swap the Caddy DNS plugin in the setup script before running it.</p>
+      <h2>3. Create a DigitalOcean API token</h2>
+      <p>The server uses Caddy with DigitalOcean DNS for wildcard TLS certificates.</p>
 
       <h2>4. Run server install</h2>
-      <pre><code>curl -fsSL https://pack.sh/server.sh | sudo sh</code></pre>
+      <pre><code>curl -fsSL https://pack.sh/server.sh | sudo PACK_DNS_PROVIDER=digitalocean sh</code></pre>
 
       <h2>5. Install locally</h2>
       <pre><code>curl -fsSL https://pack.sh/install.sh | sh</code></pre>
