@@ -50,9 +50,10 @@ await $`cp ${join(siteDir, "backpack.png")} ${join(outDir, "backpack.png")}`;
 await $`cp ${join(siteDir, "backpack-48.png")} ${join(outDir, "backpack-48.png")}`;
 await $`cp ${join(siteDir, "backpack-96.png")} ${join(outDir, "backpack-96.png")}`;
 await $`cp ${join(siteDir, "backpack-144.png")} ${join(outDir, "backpack-144.png")}`;
+await $`cp ${join(siteDir, "pack-og.png")} ${join(outDir, "pack-og.png")}`;
 await $`cp ${join(siteDir, "favicon.png")} ${join(outDir, "favicon.png")}`;
 await $`cp ${join(siteDir, "favicon.ico")} ${join(outDir, "favicon.ico")}`;
-await $`chmod 0644 ${join(outDir, "index.html")} ${join(outDir, "style.css")} ${join(outDir, "install.sh")} ${join(outDir, "install.ps1")} ${join(outDir, "server.sh")} ${join(outDir, "backpack.png")} ${join(outDir, "backpack-48.png")} ${join(outDir, "backpack-96.png")} ${join(outDir, "backpack-144.png")} ${join(outDir, "favicon.png")} ${join(outDir, "favicon.ico")}`;
+await $`chmod 0644 ${join(outDir, "index.html")} ${join(outDir, "style.css")} ${join(outDir, "install.sh")} ${join(outDir, "install.ps1")} ${join(outDir, "server.sh")} ${join(outDir, "backpack.png")} ${join(outDir, "backpack-48.png")} ${join(outDir, "backpack-96.png")} ${join(outDir, "backpack-144.png")} ${join(outDir, "pack-og.png")} ${join(outDir, "favicon.png")} ${join(outDir, "favicon.ico")}`;
 for (const path of [indexPath, join(outDir, "style.css"), join(outDir, "install.sh"), join(outDir, "install.ps1"), join(outDir, "server.sh")]) {
   await $`gzip -kf -9 ${path}`;
   await $`brotli -f -q 11 ${path}`;
