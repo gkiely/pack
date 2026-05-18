@@ -1,0 +1,8 @@
+{
+  "name": "nodejs",
+  "type": "module",
+  "private": true,
+  "volta": {
+    "node": "25.9.0"
+  }
+}

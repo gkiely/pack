@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pack instances</title>
+    <meta name="description" content="Current pack instances." />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #12100e;
+        --text: #fff7ec;
+        --muted: #bcae9d;
+        --panel: #211d19;
+        --border: #514338;
+        --accent: #ff7a45;
+        --success: #86c06a;
+        --warn: #d9a441;
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      body {
+        margin: 0;
+        padding: 48px 24px 40px;
+        background:
+          radial-gradient(circle at 22% 0%, rgba(217, 79, 43, 0.14), transparent 28%),
+          var(--bg);
+      }
+
+      main {
+        max-width: 840px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 40px;
+        line-height: 1.1;
+      }
+
+      p {
+        margin: 0 0 24px;
+        color: var(--muted);
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .url {
+        white-space: normal;
+        word-break: break-word;
+      }
+
+      .status {
+        color: var(--warn);
+      }
+
+      .status-active {
+        color: var(--success);
+      }
+
+      .current {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 1px 6px 2px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.4;
+        vertical-align: 1px;
+      }
+
+      @media (max-width: 720px) {
+        table,
+        tbody,
+        tr,
+        td {
+          display: block;
+        }
+
+        thead {
+          display: none;
+        }
+
+        tr {
+          padding: 10px 0;
+          border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child {
+          border-bottom: 0;
+        }
+
+        td {
+          padding: 4px 14px;
+          border: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>instances</h1>
+      <p id="summary"></p>
+      <table>
+        <thead>
+          <tr>
+            <th>App</th>
+            <th>Type</th>
+            <th>Release</th>
+            <th>Status</th>
+            <th>URL</th>
+          </tr>
+        </thead>
+        <tbody id="instances"></tbody>
+      </table>
+    </main>
+    <script>
+      const instances = __PACK_INSTANCES_JSON__;
+      const summary = document.querySelector("#summary");
+      const tbody = document.querySelector("#instances");
+
+      const activeCount = instances.filter((instance) => instance.service === "active").length;
+      const inactiveCount = instances.length - activeCount;
+      const summaryParts = [];
+      if (activeCount > 0) {
+        summaryParts.push(`${activeCount} active`);
+      }
+      if (inactiveCount > 0) {
+        summaryParts.push(`${inactiveCount} inactive`);
+      }
+      summary.textContent =
+        summaryParts.length > 0
+          ? `${summaryParts.join(", ")} pack ${instances.length === 1 ? "instance" : "instances"}.`
+          : "No pack instances.";
+
+      function cell(text, className = "") {
+        const td = document.createElement("td");
+        td.textContent = text;
+        if (className) td.className = className;
+        return td;
+      }
+
+      function releaseCell(instance) {
+        const td = cell(instance.release);
+        if (instance.current) {
+          const badge = document.createElement("span");
+          badge.className = "current";
+          badge.textContent = "current";
+          td.append(" ", badge);
+        }
+        return td;
+      }
+
+      tbody.replaceChildren(
+        ...instances.map((instance) => {
+          const tr = document.createElement("tr");
+          tr.append(
+            cell(instance.app),
+            cell(instance.type),
+            releaseCell(instance),
+            cell(instance.service, instance.service === "active" ? "status status-active" : "status"),
+          );
+
+          const url = document.createElement("td");
+          url.className = "url";
+          const link = document.createElement("a");
+          link.href = instance.url;
+          link.textContent = instance.url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          url.append(link);
+          tr.append(url);
+          return tr;
+        }),
+      );
+    </script>
+  </body>
+</html>

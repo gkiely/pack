@@ -1,0 +1,4 @@
+{
+  "name": "c",
+  "build": "zig cc src/main.c -target x86_64-linux-gnu -O2 -s -o .pack/app"
+}

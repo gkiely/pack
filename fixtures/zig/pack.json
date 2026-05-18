@@ -1,0 +1,4 @@
+{
+  "name": "zig",
+  "build": "zig build-exe src/main.zig -O ReleaseSmall -target x86_64-linux-gnu -lc -femit-bin=.pack/app"
+}

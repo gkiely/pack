@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pack on DigitalOcean</title>
+    <link rel="icon" href="../favicon.ico" sizes="any" />
+    <link rel="icon" href="../favicon.png" type="image/png" />
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <main>
+      <nav class="top-links" aria-label="Primary">
+        <a href="/"><svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg>Home</a>
+        <a href="https://forms.gle/ZWbtktrfPV7PJu7X6" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true"><path d="M6.657 18C4.085 18 2 15.993 2 13.517c0-2.475 2.085-4.482 4.657-4.482c.393-1.762 1.794-3.2 3.675-3.773c1.88-.572 3.956-.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99c1.913 0 3.464 1.56 3.464 3.486c0 1.927-1.551 3.487-3.465 3.487H6.657"/></svg>Cloud</a>
+        <a href="https://github.com/gkiely/pack" target="_blank" rel="noreferrer"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.67 0 8.2c0 3.63 2.29 6.7 5.47 7.78.4.08.55-.18.55-.4 0-.2-.01-.85-.01-1.54-2.01.38-2.53-.5-2.69-.96-.09-.24-.48-.96-.82-1.16-.28-.15-.68-.53-.01-.54.63-.01 1.08.59 1.23.84.72 1.24 1.87.89 2.33.68.07-.53.28-.89.51-1.09-1.78-.21-3.64-.91-3.64-4.04 0-.89.31-1.62.82-2.19-.08-.21-.36-1.04.08-2.16 0 0 .67-.22 2.2.84A7.4 7.4 0 0 1 8 3.99c.68 0 1.36.09 2 .27 1.52-1.06 2.19-.84 2.19-.84.44 1.12.16 1.95.08 2.16.51.57.82 1.3.82 2.19 0 3.14-1.87 3.83-3.65 4.04.29.25.54.75.54 1.52 0 1.09-.01 1.97-.01 2.25 0 .22.15.48.55.4A8.1 8.1 0 0 0 16 8.2C16 3.67 12.42 0 8 0Z"/></svg>GitHub</a>
+      </nav>
+      <h1>DigitalOcean setup</h1>
+      <p>Create one Ubuntu Droplet, point a wildcard DNS record at it, then run the setup command.</p>
+
+      <h2>1. Create the Droplet</h2>
+      <ul>
+        <li>Use Ubuntu 24.04 LTS.</li>
+        <li>Add your SSH key to the root user during creation.</li>
+        <li>Use a Droplet with IPv4 enabled.</li>
+      </ul>
+
+      <h2>2. Configure DNS</h2>
+      <p>Create these records for your domain:</p>
+      <pre><code>A     example.com      YOUR_DROPLET_IPV4
+A     *.example.com    YOUR_DROPLET_IPV4</code></pre>
+
+      <h2>3. TLS DNS challenge</h2>
+      <p>The current setup script installs Caddy with the Vultr DNS plugin. For DigitalOcean, either manage DNS at Vultr for now, or swap the Caddy DNS plugin in the setup script before running it.</p>
+
+      <h2>4. Run server install</h2>
+      <pre><code>curl -fsSL https://pack.sh/server.sh | sudo sh</code></pre>
+
+      <h2>5. Install locally</h2>
+      <pre><code>curl -fsSL https://pack.sh/install.sh | sh</code></pre>
+
+      <h2>6. Deploy</h2>
+      <pre><code>pack</code></pre>
+    </main>
+  </body>
+</html>

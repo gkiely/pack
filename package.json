@@ -1,0 +1,56 @@
+{
+  "name": "pack",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun scripts/start-site.ts",
+    "test": "bun test",
+    "bootstrap:host": "bun scripts/bootstrap-host.ts",
+    "smoke:fixture": "bun scripts/smoke-fixture.ts",
+    "smoke:static-html": "bun scripts/smoke-static-html.ts",
+    "smoke:nodejs": "bun scripts/smoke-nodejs.ts",
+    "smoke:c": "bun scripts/smoke-language-fixture.ts c",
+    "smoke:cpp": "bun scripts/smoke-language-fixture.ts cpp",
+    "smoke:deno": "bun scripts/smoke-language-fixture.ts deno",
+    "smoke:go": "bun scripts/smoke-language-fixture.ts go",
+    "smoke:rust": "bun scripts/smoke-language-fixture.ts rust",
+    "smoke:zig": "bun scripts/smoke-language-fixture.ts zig",
+    "smoke:hn-cron": "bun scripts/smoke-hn-cron.ts",
+    "delete:instance": "bun scripts/delete-instance.ts",
+    "delete:instances": "bun scripts/delete-instances.ts",
+    "instances": "bun scripts/list-instances.ts",
+    "build:binaries": "bun scripts/build-binaries.ts",
+    "publish:binaries": "bun scripts/publish-binaries.ts",
+    "deploy": "bun scripts/publish-site.ts",
+    "compile:mac": "bun build ./index.ts --compile --minify --outfile ./dist/app",
+    "compile:linux": "bun build ./index.ts --compile --minify --target=bun-linux-x64-baseline --outfile ./dist/app",
+    "compress": "bun compile:linux && tar -cf - -C dist app | zstd -1 -T0 -q -f -o ./dist/app.tar.zst",
+    "pack": "mkdir -p dist && bun compile:linux && bun rsync:local",
+    "watch": "bun scripts/watch.ts",
+    "prewarm": "tmpdir=$(mktemp -d) && trap 'rm -rf \"$tmpdir\"' EXIT && printf 'console.log(\"prewarm\")\\n' > \"$tmpdir/index.ts\" && bun build \"$tmpdir/index.ts\" --compile --minify --target=bun-linux-x64-baseline --outfile \"$tmpdir/prewarm\"",
+    "rsync:local": "mkdir -p .pack && rsync -avP --stats --no-whole-file ./dist/app ./.pack/app",
+    "rsync:local:reset": "rm -rf .pack",
+    "rsync:remote": "echo 'not yet implemented'",
+    "bench": "bun scripts/bench.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/html-minifier-terser": "^7.0.2",
+    "@types/ssh2": "^1.15.5",
+    "esbuild": "^0.28.0",
+    "html-minifier-terser": "^7.2.0",
+    "oxc-parser": "^0.131.0",
+    "postject": "^1.0.0-alpha.6",
+    "zx": "^8.8.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "ssh2": "^1.17.0"
+  },
+  "volta": {
+    "node": "25.9.0"
+  }
+}

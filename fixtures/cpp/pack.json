@@ -1,0 +1,4 @@
+{
+  "name": "cpp",
+  "build": "zig c++ src/main.cpp -target x86_64-linux-gnu -O2 -s -Wno-nullability-completeness -o .pack/app"
+}

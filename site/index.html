@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pack</title>
+    <meta
+      name="description"
+      content="Run pack to deploy a persistent immutable HTTPS instance with single command server install."
+    />
+    <link rel="canonical" href="https://pack.sh/" />
+    <meta name="theme-color" content="#111111" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pack.sh/" />
+    <meta property="og:title" content="pack" />
+    <meta
+      property="og:description"
+      content="Run pack to deploy a persistent immutable HTTPS instance with single command server install."
+    />
+    <meta property="og:image" content="https://pack.sh/backpack.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="pack" />
+    <meta
+      name="twitter:description"
+      content="Run pack to deploy a persistent immutable HTTPS instance with single command server install."
+    />
+    <meta name="twitter:image" content="https://pack.sh/backpack.png" />
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="icon" href="favicon.png" type="image/png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <nav class="top-links" aria-label="Primary">
+        <a href="/docs/"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 1.5A1.5 1.5 0 0 0 2.5 3v10A1.5 1.5 0 0 0 4 14.5h8a1.5 1.5 0 0 0 1.5-1.5V5.9L9.1 1.5H4Zm0 1.3h4.5v3.6h3.7V13a.2.2 0 0 1-.2.2H4a.2.2 0 0 1-.2-.2V3a.2.2 0 0 1 .2-.2Zm5.8.9 1.5 1.5H9.8V3.7ZM5.2 8h5.6v1.2H5.2V8Zm0 2.4h5.6v1.2H5.2v-1.2Z"/></svg>Docs</a>
+        <a href="https://forms.gle/ZWbtktrfPV7PJu7X6" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true"><path d="M6.657 18C4.085 18 2 15.993 2 13.517c0-2.475 2.085-4.482 4.657-4.482c.393-1.762 1.794-3.2 3.675-3.773c1.88-.572 3.956-.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99c1.913 0 3.464 1.56 3.464 3.486c0 1.927-1.551 3.487-3.465 3.487H6.657"/></svg>Cloud</a>
+        <a href="https://github.com/gkiely/pack" target="_blank" rel="noreferrer"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.67 0 8.2c0 3.63 2.29 6.7 5.47 7.78.4.08.55-.18.55-.4 0-.2-.01-.85-.01-1.54-2.01.38-2.53-.5-2.69-.96-.09-.24-.48-.96-.82-1.16-.28-.15-.68-.53-.01-.54.63-.01 1.08.59 1.23.84.72 1.24 1.87.89 2.33.68.07-.53.28-.89.51-1.09-1.78-.21-3.64-.91-3.64-4.04 0-.89.31-1.62.82-2.19-.08-.21-.36-1.04.08-2.16 0 0 .67-.22 2.2.84A7.4 7.4 0 0 1 8 3.99c.68 0 1.36.09 2 .27 1.52-1.06 2.19-.84 2.19-.84.44 1.12.16 1.95.08 2.16.51.57.82 1.3.82 2.19 0 3.14-1.87 3.83-3.65 4.04.29.25.54.75.54 1.52 0 1.09-.01 1.97-.01 2.25 0 .22.15.48.55.4A8.1 8.1 0 0 0 16 8.2C16 3.67 12.42 0 8 0Z"/></svg>GitHub</a>
+      </nav>
+      <div class="title">
+        <h1>pack</h1>
+        <img
+          src="backpack-48.png"
+          srcset="backpack-48.png 1x, backpack-96.png 2x, backpack-144.png 3x"
+          width="48"
+          height="48"
+          alt="backpack"
+        />
+      </div>
+      <p>Self-host apps with one command.
+        Run <code>pack</code> and get a persistent HTTPS URL.
+      </p>
+      <h2>Server install</h2>
+      <div class="tabs">
+        <input id="server-linux" type="radio" name="server" checked />
+        <div class="tab-list">
+          <label for="server-linux">Linux</label>
+          <a class="script-link script-server" href="server.sh" target="_blank" rel="noreferrer">View install script</a>
+        </div>
+        <pre class="tab-panel server-linux"><code>curl -fsSL https://pack.sh/server.sh | sudo sh</code><button class="copy" type="button" aria-label="Copy command" data-copy="curl -fsSL https://pack.sh/server.sh | sudo sh"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"></path></svg></button></pre>
+      </div>
+      <h2>Local install</h2>
+      <div class="tabs">
+        <input id="install-unix" type="radio" name="install" checked />
+        <input id="install-windows" type="radio" name="install" />
+        <div class="tab-list">
+          <label for="install-unix">Linux &amp; macOS</label>
+          <label for="install-windows">Windows</label>
+          <a class="script-link script-unix" href="install.sh" target="_blank" rel="noreferrer">View install script</a>
+          <a class="script-link script-windows" href="install.ps1" target="_blank" rel="noreferrer">View install script</a>
+        </div>
+        <pre class="tab-panel install-unix"><code>curl -fsSL https://pack.sh/install.sh | sh</code><button class="copy" type="button" aria-label="Copy command" data-copy="curl -fsSL https://pack.sh/install.sh | sh"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"></path></svg></button></pre>
+        <pre class="tab-panel install-windows"><code>powershell -c "irm pack.sh/install.ps1 | iex"</code><button class="copy" type="button" aria-label="Copy command" data-copy='powershell -c "irm pack.sh/install.ps1 | iex"'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"></path></svg></button></pre>
+      </div>
+      <h2>Build & Deploy</h2>
+      <pre class="command"><code>pack</code><button class="copy" type="button" aria-label="Copy command" data-copy="pack"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"></path></svg></button></pre>
+
+      <h2>View</h2>
+      <a class="view-link" href="https://hello.pack.sh/" target="_blank" rel="noreferrer">
+        <code>https://hello.pack.sh/</code>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
+          <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"></path>
+        </svg>
+      </a>
+
+      <h2>Features</h2>
+      <ul>
+        <li>Self-hosted</li>
+        <li>Single command server install.</li>
+        <li>Single command deploy.</li>
+        <li>Builds apps into single-file executables.</li>        
+        <li>Persistent and immutable instances.</li>
+        <li>Automatic port pooling via <code>process.env.PORT</code></li>
+        <li>Inactive deployments are put to sleep and restored on request.</li>
+        <li>Supports static HTML, Node.js (20.6.0+), Bun, Deno, Go, Zig, Rust, C and C++.</li>
+      </ul>
+
+      <h2>How it works</h2>
+      <p>
+        <code>pack</code> builds your project into a single-file executable and deploys it to your server.
+        No server updates or build pipelines to configure.
+      </p>
+      <p>
+        Every time you run <code>pack</code>, it creates a new deployment. Old deployments are put to sleep and deleted after 30 days of inactivity.
+      </p>
+
+      <h2>Instances</h2>
+      <a class="view-link" href="/instances/">
+        <code>https://pack.sh/instances/</code>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
+          <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"></path>
+        </svg>
+      </a>
+
+    </main>
+    <script>
+      const copyIcon =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"></path></svg>';
+      const checkIcon =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"></path></svg>';
+
+      for (const button of document.querySelectorAll(".copy")) {
+        button.addEventListener("click", async () => {
+          await navigator.clipboard.writeText(button.dataset.copy);
+          button.innerHTML = checkIcon;
+          button.classList.add("copied");
+          window.setTimeout(() => {
+            button.innerHTML = copyIcon;
+            button.classList.remove("copied");
+          }, 1400);
+        });
+      }
+    </script>
+  </body>
+</html>

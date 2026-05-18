@@ -1,0 +1,4 @@
+{
+  "name": "bun",
+  "build": "bun build ./src/index.ts --compile --minify --target=bun-linux-x64-baseline --outfile .pack/app"
+}

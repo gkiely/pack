@@ -1,0 +1,4 @@
+{
+  "name": "rust",
+  "build": "cargo build --release --target x86_64-unknown-linux-gnu && cp target/x86_64-unknown-linux-gnu/release/pack-fixture-rust .pack/app"
+}

@@ -1,0 +1,4 @@
+{
+  "name": "static-html",
+  "build": "bun build ./public/index.html --outdir .pack/static"
+}

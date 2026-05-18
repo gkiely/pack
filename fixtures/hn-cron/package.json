@@ -1,0 +1,5 @@
+{
+  "name": "hn-cron",
+  "type": "module",
+  "private": true
+}

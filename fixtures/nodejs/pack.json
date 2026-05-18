@@ -1,0 +1,4 @@
+{
+  "name": "nodejs",
+  "build": "node build-sea.mjs"
+}

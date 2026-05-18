@@ -1,0 +1,303 @@
+:root {
+        color-scheme: dark;
+        --bg: #12100e;
+        --text: #fff7ec;
+        --muted: #bcae9d;
+        --panel: #211d19;
+        --panel-strong: #2a241f;
+        --border: #514338;
+        --border-soft: #342b25;
+        --accent: #d94f2b;
+        --accent-soft: #ff7a45;
+        --success: #86c06a;
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      body {
+        margin: 0;
+        padding: 48px 24px 40px 24px;
+        background:
+          radial-gradient(circle at 22% 0%, rgba(217, 79, 43, 0.14), transparent 28%),
+          var(--bg);
+        color: var(--text);
+      }
+
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 40px;
+        line-height: 1.1;
+      }
+
+      main > h1 {
+        margin-bottom: 16px;
+      }
+
+      p {
+        margin: 0 0 20px;
+        color: var(--muted);
+      }
+
+      pre {
+        overflow-x: auto;
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+
+      p > code,
+      li > code {
+        padding: 2px 6px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        background: var(--panel);
+        color: var(--text);
+        font-size: 0.92em;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      }
+
+      ul {
+        padding-left: 20px;
+      }
+
+      a {
+        color: var(--accent-soft);
+      }
+
+      .view-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 24px;
+        padding: 16px;
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        background: var(--panel);
+        text-decoration: none;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      }
+
+      .view-link code {
+        flex: 1;
+        white-space: nowrap;
+      }
+
+      .view-link svg {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 auto;
+        color: var(--muted);
+      }
+
+      .view-link:hover svg {
+        color: var(--accent-soft);
+      }
+
+      .top-links {
+        position: absolute;
+        top: 40px;
+        right: max(24px, calc((100vw - 720px) / 2));
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+        margin: 0;
+      }
+
+      .top-links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 34px;
+        padding: 0 13px;
+        border: 1px solid var(--border-soft);
+        border-radius: 8px;
+        color: var(--muted);
+        background: color-mix(in srgb, var(--panel) 48%, transparent);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      }
+
+      .top-links a svg {
+        width: 15px;
+        height: 15px;
+        flex: 0 0 auto;
+      }
+
+      .top-links a:hover {
+        color: var(--text);
+        border-color: var(--border);
+        background: var(--panel);
+      }
+
+      @media (max-width: 620px) {
+        .top-links {
+          position: static;
+          justify-content: flex-start;
+          margin: 0 0 24px;
+        }
+      }
+
+      .tabs {
+        margin: 0 0 24px;
+      }
+
+      .tabs input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .tab-list {
+        display: flex;
+        align-items: end;
+        gap: 0;
+      }
+
+      .tab-list label,
+      .tab-list a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 18px;
+        border: 1px solid var(--border);
+        border-bottom: 0;
+        border-radius: 8px 8px 0 0;
+        color: var(--muted);
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .tab-list label + label {
+        margin-left: -1px;
+      }
+
+      .tab-list a {
+        border-color: transparent;
+        color: color-mix(in srgb, var(--muted) 72%, var(--bg));
+        font-size: 14px;
+      }
+
+      .tab-list a:hover {
+        color: var(--muted);
+      }
+
+      .tab-list .script-link {
+        display: none;
+      }
+
+      #install-unix:checked ~ .tab-list label[for="install-unix"],
+      #install-windows:checked ~ .tab-list label[for="install-windows"],
+      #server-linux:checked ~ .tab-list label[for="server-linux"] {
+        color: var(--text);
+        border-color: var(--border);
+        border-top-color: var(--accent);
+        background: var(--panel);
+        box-shadow: inset 0 2px 0 var(--accent);
+        position: relative;
+        z-index: 1;
+      }
+
+      #install-unix:checked ~ .tab-list .script-unix,
+      #install-windows:checked ~ .tab-list .script-windows,
+      #server-linux:checked ~ .tab-list .script-server {
+        display: inline-flex;
+      }
+
+      .tab-panel {
+        display: none;
+      }
+
+      #install-unix:checked ~ .install-unix,
+      #install-windows:checked ~ .install-windows,
+      #server-linux:checked ~ .server-linux {
+        display: flex;
+      }
+
+      .tabs pre {
+        align-items: center;
+        gap: 12px;
+        overflow: hidden;
+        margin: 0;
+        padding: 0 14px 0 16px;
+        border-radius: 0 8px 8px 8px;
+      }
+
+      .tabs pre code {
+        flex: 1;
+        overflow-x: auto;
+        padding: 16px 0;
+        white-space: pre;
+      }
+
+      .command {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        overflow: hidden;
+        margin: 0;
+        padding: 0 14px 0 16px;
+      }
+
+      .command code {
+        flex: 1;
+        overflow-x: auto;
+        padding: 16px 0;
+        white-space: pre;
+      }
+
+      .copy {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 0;
+        color: var(--muted);
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .copy:hover {
+        color: var(--accent-soft);
+      }
+
+      .copy.copied {
+        color: var(--success);
+      }
+
+      .copy svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .title {
+        display: flex;
+        align-items: center;
+        margin: 0 0 16px;
+      }
+
+      .title img {
+        width: 48px;
+        height: 48px;
+        margin-bottom: -6px;
+        object-fit: contain;
+      }

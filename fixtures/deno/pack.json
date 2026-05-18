@@ -1,0 +1,4 @@
+{
+  "name": "deno",
+  "build": "deno compile --allow-net --allow-env --target x86_64-unknown-linux-gnu --output .pack/app src/main.ts"
+}

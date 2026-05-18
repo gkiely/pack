@@ -1,0 +1,5 @@
+{
+  "name": "static-html",
+  "type": "module",
+  "private": true
+}
