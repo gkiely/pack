@@ -699,6 +699,7 @@ export function createDeployPlan(
           `printf '%s\\n' ${shellQuote(config.type)} > ${shellQuote(`${releasePath}/app-type`)}`,
           createWriteMetadataCommand(config, releaseId, mode, `${releasePath}/metadata.json`),
           `ln -sfn ${shellQuote(releasePath)} ${shellQuote(`${appRoot}/current`)}`,
+          `curl -fsS -X POST http://127.0.0.1:40999/internal/refresh-instances >/dev/null 2>&1 || true`,
         ]
       : [
           `[ ! -e ${shellQuote(releasePath)} ]`,
@@ -715,6 +716,7 @@ export function createDeployPlan(
           `sudo /usr/local/bin/pack-write-systemd ${shellQuote(config.name)} ${shellQuote(releaseId)}`,
           `curl --unix-socket /run/pack/supervisor.sock -fsS -X POST ${shellQuote(`http://pack-supervisor/releases/${releaseId}/start`)}`,
           `if [ -n "$previous_release" ] && [ "$previous_release" != ${shellQuote(releaseId)} ]; then curl --unix-socket /run/pack/supervisor.sock -fsS -X POST "http://pack-supervisor/releases/$previous_release/stop" >/dev/null 2>&1 || true; fi`,
+          `curl -fsS -X POST http://127.0.0.1:40999/internal/refresh-instances >/dev/null 2>&1 || true`,
         ];
 
   return {

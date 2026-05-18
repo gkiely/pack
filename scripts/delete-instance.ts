@@ -71,6 +71,7 @@ fi
 if [ "$dry_run" = 0 ]; then
   systemctl daemon-reload
   caddy reload --config /etc/caddy/Caddyfile
+  curl -fsS -X POST http://127.0.0.1:40999/internal/refresh-instances >/dev/null 2>&1 || true
 fi
 `;
 }

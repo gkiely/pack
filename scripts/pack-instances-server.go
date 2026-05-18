@@ -10,10 +10,17 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 )
 
 //go:embed pack-instances.html
 var instancesHTML string
+
+var instancesCache = struct {
+	sync.Mutex
+	rows   []instance
+	loaded bool
+}{}
 
 type instance struct {
 	App       string `json:"app"`
@@ -29,6 +36,7 @@ type instance struct {
 func main() {
 	http.HandleFunc("/instances", handleInstancesHTML)
 	http.HandleFunc("/instances/", handleInstancesHTML)
+	http.HandleFunc("/internal/refresh-instances", handleRefreshInstances)
 	http.HandleFunc("/instances.json", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/instances.json" {
 			http.NotFound(w, r)
@@ -37,12 +45,21 @@ func main() {
 
 		w.Header().Set("content-type", "application/json; charset=utf-8")
 		w.Header().Set("cache-control", "no-store")
-		if err := json.NewEncoder(w).Encode(map[string][]instance{"instances": instances()}); err != nil {
+		if err := json.NewEncoder(w).Encode(map[string][]instance{"instances": cachedInstances()}); err != nil {
 			log.Printf("encode instances: %v", err)
 		}
 	})
 
 	log.Fatal(http.ListenAndServe("127.0.0.1:40999", nil))
+}
+
+func handleRefreshInstances(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	refreshInstances()
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func handleInstancesHTML(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +68,7 @@ func handleInstancesHTML(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := json.Marshal(instances())
+	payload, err := json.Marshal(cachedInstances())
 	if err != nil {
 		http.Error(w, "failed to load instances", http.StatusInternalServerError)
 		log.Printf("marshal instances: %v", err)
@@ -63,6 +80,30 @@ func handleInstancesHTML(w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write([]byte(strings.Replace(instancesHTML, "__PACK_INSTANCES_JSON__", string(payload), 1))); err != nil {
 		log.Printf("write instances html: %v", err)
 	}
+}
+
+func cachedInstances() []instance {
+	instancesCache.Lock()
+	defer instancesCache.Unlock()
+
+	if instancesCache.loaded {
+		return append([]instance(nil), instancesCache.rows...)
+	}
+
+	rows := instances()
+	instancesCache.rows = append([]instance(nil), rows...)
+	instancesCache.loaded = true
+	return append([]instance(nil), rows...)
+}
+
+func refreshInstances() {
+	rows := instances()
+
+	instancesCache.Lock()
+	defer instancesCache.Unlock()
+
+	instancesCache.rows = append([]instance(nil), rows...)
+	instancesCache.loaded = true
 }
 
 func instances() []instance {
