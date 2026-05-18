@@ -15,6 +15,10 @@ test("createBootstrapScript installs host dependencies and helpers", () => {
   expect(script).toContain("go build -o /usr/local/bin/pack-supervisor /tmp/pack-supervisor.go");
   expect(script).toContain("cat > /etc/systemd/system/pack-supervisor.service");
   expect(script).toContain("pack ALL=(root) NOPASSWD: /usr/local/bin/pack-write-systemd");
+  expect(script).toContain("PasswordAuthentication no");
+  expect(script).toContain("PermitRootLogin prohibit-password");
+  expect(script).toContain("AllowTcpForwarding no");
+  expect(script).toContain("ufw --force enable");
   expect(script).not.toContain("cat > /usr/local/bin/pack-ensure-baseline");
   expect(script).not.toContain("pack ALL=(root) NOPASSWD: /usr/local/bin/pack-ensure-baseline");
   expect(script).not.toContain("pack ALL=(root) NOPASSWD: /usr/local/bin/pack-allocate-port");
@@ -32,6 +36,10 @@ test("createBootstrapScript helper scripts validate names and write expected fil
   expect(script).toContain('cat > "/etc/systemd/system/pack-$release.service"');
   expect(script).toContain('ExecStart=/var/pack/apps/$app/releases/$release/app');
   expect(script).toContain("EnvironmentFile=/run/pack/releases/$release.env");
+  expect(script).toContain("PrivateDevices=true");
+  expect(script).toContain("ProtectKernelTunables=true");
+  expect(script).toContain("SystemCallArchitectures=native");
+  expect(script).toContain("UMask=0027");
   expect(script).toContain("mkdir -p /var/pack/apps /run/pack/releases /run/pack/ports /etc/pack /etc/caddy/conf.d /etc/caddy/routes.d");
   expect(script).toContain('pack_domain="${PACK_DOMAIN:-}"');
   expect(script).toContain("Domain for pack apps, like example.com:");
@@ -40,6 +48,8 @@ test("createBootstrapScript helper scripts validate names and write expected fil
   expect(script).toContain("Vultr API key for DNS certificates:");
   expect(script).toContain('read -r api_key < /dev/tty');
   expect(script).toContain("printf 'VULTR_API_KEY=%s\\n' \"$api_key\"");
+  expect(script).toContain('case "$pack_domain" in');
+  expect(script).toContain('echo "invalid domain"');
   expect(script).toContain("EnvironmentFile=-/etc/pack/host.env");
   expect(script).not.toContain("/var/pack/baselines");
   expect(script).not.toContain("trusted-token");

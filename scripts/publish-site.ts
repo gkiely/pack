@@ -108,8 +108,24 @@ After=network.target
 ExecStart=/usr/local/bin/pack-instances-server
 Restart=always
 RestartSec=2
+User=pack
+Group=pack
 NoNewPrivileges=true
 PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectClock=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+UMask=0027
 
 [Install]
 WantedBy=multi-user.target

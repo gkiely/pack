@@ -36,6 +36,18 @@ MemoryMax=256M
 CPUQuota=50%
 NoNewPrivileges=true
 PrivateTmp=true
+PrivateDevices=true
+ProtectHome=true
+ProtectClock=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
+RestrictRealtime=true
+UMask=0027
 
 [Install]
 WantedBy=multi-user.target
@@ -109,6 +121,9 @@ if [ -z "$api_key" ]; then
   echo "API_KEY is required" >&2
   exit 1
 fi
+case "$pack_domain" in
+  *[!a-zA-Z0-9.-]*|.*|*..*|*.|"") echo "invalid domain" >&2; exit 1 ;;
+esac
 
 apt-get update
 apt-get install -y rsync caddy curl ca-certificates sudo golang-go
@@ -120,8 +135,31 @@ if ! caddy list-modules | grep -q '^dns.providers.vultr$'; then
 fi
 
 if command -v ufw >/dev/null 2>&1; then
+  ufw allow 22/tcp
   ufw allow 80/tcp
   ufw allow 443/tcp
+  ufw --force enable
+fi
+
+mkdir -p /etc/ssh/sshd_config.d
+cat > /etc/ssh/sshd_config.d/50-cloud-init.conf <<'SSH'
+PasswordAuthentication no
+SSH
+cat > /etc/ssh/sshd_config.d/99-pack-hardening.conf <<'SSH'
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no
+PermitRootLogin prohibit-password
+X11Forwarding no
+AllowTcpForwarding no
+GatewayPorts no
+PermitUserEnvironment no
+MaxAuthTries 3
+SSH
+chmod 0600 /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/99-pack-hardening.conf
+if command -v sshd >/dev/null 2>&1; then
+  sshd -t
+  systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null || true
 fi
 
 if ! id pack >/dev/null 2>&1; then
@@ -185,6 +223,20 @@ After=network.target
 ExecStart=/usr/local/bin/pack-supervisor
 Restart=always
 RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectHome=true
+ProtectClock=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
+RestrictRealtime=true
+UMask=0027
 
 [Install]
 WantedBy=multi-user.target
