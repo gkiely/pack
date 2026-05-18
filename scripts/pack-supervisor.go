@@ -688,6 +688,10 @@ func scanMetadata() (map[string]metadata, map[string]string, error) {
 			continue
 		}
 		for _, path := range paths {
+			release := filepath.Base(filepath.Dir(path))
+			if !validRelease(release) {
+				continue
+			}
 			content, err := os.ReadFile(path)
 			if err != nil {
 				continue
@@ -696,12 +700,44 @@ func scanMetadata() (map[string]metadata, map[string]string, error) {
 			if err := json.Unmarshal(content, &meta); err != nil {
 				return nil, nil, err
 			}
-			if validRelease(meta.Release) {
-				releasesByID[meta.Release] = meta
+			normalized, ok := normalizeMetadata(appName, release, meta)
+			if ok {
+				releasesByID[release] = normalized
 			}
 		}
 	}
 	return releasesByID, currentByApp, nil
+}
+
+func normalizeMetadata(app string, release string, meta metadata) (metadata, bool) {
+	if !validApp(app) || !validRelease(release) {
+		return metadata{}, false
+	}
+	if meta.Release != "" && meta.Release != release {
+		return metadata{}, false
+	}
+	if meta.App != "" && meta.App != app {
+		return metadata{}, false
+	}
+	switch meta.Kind {
+	case "executable":
+		meta.App = app
+		meta.Release = release
+		meta.Root = ""
+		return meta, true
+	case "static":
+		meta.App = app
+		meta.Release = release
+		expectedRoot := filepath.Join(releaseRoot(meta), "static")
+		cleanRoot := filepath.Clean(meta.Root)
+		if cleanRoot != expectedRoot {
+			return metadata{}, false
+		}
+		meta.Root = expectedRoot
+		return meta, true
+	default:
+		return metadata{}, false
+	}
 }
 
 func serveStatic(w http.ResponseWriter, r *http.Request, root string) {
@@ -824,6 +860,18 @@ func validRelease(release string) bool {
 	}
 	for _, r := range release {
 		if (r < 'a' || r > 'z') && (r < '0' || r > '9') {
+			return false
+		}
+	}
+	return true
+}
+
+func validApp(app string) bool {
+	if app == "" {
+		return false
+	}
+	for _, r := range app {
+		if (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != '-' {
 			return false
 		}
 	}
