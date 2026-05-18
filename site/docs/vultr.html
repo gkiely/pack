@@ -25,22 +25,32 @@
         <li>Use a server with IPv4 enabled.</li>
       </ul>
 
-      <h2>2. Configure DNS</h2>
-      <p>Create these records for your domain:</p>
+      <h2>2. Add your SSH key</h2>
+      <p>If you do not have an SSH key yet, create one locally:</p>
+      <pre><code>ssh-keygen -t ed25519 -C "you@example.com"</code></pre>
+      <p>Copy your public key:</p>
+      <pre><code>cat ~/.ssh/id_ed25519.pub</code></pre>
+      <p>In Vultr, go to Account, then SSH Keys, add the public key, and select it when creating the server.</p>
+
+      <h2>3. Configure Vultr DNS</h2>
+      <p>In the Vultr Console, go to Products, expand Network, then select DNS. Click Add Domain, enter your domain, select the Vultr instance for the default A record, then click Add.</p>
+      <p>At your domain registrar, change the domain to use Vultr's nameservers:</p>
+      <pre><code>ns1.vultr.com
+ns2.vultr.com</code></pre>
+      <p>Open the domain in Vultr DNS, then create or confirm these A records:</p>
       <pre><code>A     example.com      YOUR_SERVER_IPV4
 A     *.example.com    YOUR_SERVER_IPV4</code></pre>
+      <p>For the wildcard record, choose type A, enter <code>*</code> in the Name field, and enter the server IPv4 address in the Data field.</p>
+      <p>After the nameserver change has propagated, this should return Vultr nameservers:</p>
+      <pre><code>dig NS example.com +short</code></pre>
 
-      <h2>3. Create a Vultr DNS token</h2>
+      <h2>4. Create a Vultr DNS token</h2>
       <p>The server uses Caddy with Vultr DNS for wildcard TLS certificates.</p>
+      <p>In Vultr, go to Account, then API. Enable API access if needed, then copy your API key.</p>
+      <p>The server installer asks for this key as the DNS API key.</p>
 
-      <h2>4. Run server install</h2>
+      <h2>5. Run server install</h2>
       <pre><code>curl -fsSL https://pack.sh/server.sh | sudo PACK_DNS_PROVIDER=vultr sh</code></pre>
-
-      <h2>5. Install locally</h2>
-      <pre><code>curl -fsSL https://pack.sh/install.sh | sh</code></pre>
-
-      <h2>6. Deploy</h2>
-      <pre><code>pack</code></pre>
     </main>
   </body>
 </html>
