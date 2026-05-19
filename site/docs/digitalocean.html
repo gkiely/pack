@@ -24,7 +24,6 @@
       <h2>1. Create the Droplet</h2>
       <ul>
         <li>Use Ubuntu 24.04 LTS.</li>
-        <li>Add your SSH key to the root user during creation.</li>
         <li>Use a Droplet with IPv4 enabled.</li>
       </ul>
 
@@ -42,19 +41,24 @@
 ns2.digitalocean.com
 ns3.digitalocean.com</code></pre>
       <p>On the domain records page, click Create a record and create these A records:</p>
-      <pre><code>A     example.com      YOUR_DROPLET_IPV4
-A     *.example.com    YOUR_DROPLET_IPV4</code></pre>
-      <p>For the wildcard record, enter <code>*</code> in the hostname field.</p>
+      <pre><code>A     @      YOUR_DROPLET_IPV4
+A     *      YOUR_DROPLET_IPV4</code></pre>
+      <p>Use <code>@</code> in the hostname field for the apex domain and <code>*</code> for the wildcard record.</p>
       <p>After the nameserver change has propagated, this should return DigitalOcean nameservers:</p>
       <pre><code>dig NS example.com +short</code></pre>
 
       <h2>4. Create a DigitalOcean API token</h2>
       <p>The server uses Caddy with DigitalOcean DNS for wildcard TLS certificates.</p>
-      <p>In DigitalOcean, go to API, then Tokens, and create a personal access token. The token needs read and write access so Caddy can create ACME DNS challenge records.</p>
+      <p>In DigitalOcean, go to API, then Tokens, and create a personal access token. Use Full Access, or use custom scopes with <code>domain:read</code>, <code>domain:create</code>, <code>domain:update</code>, and <code>domain:delete</code> so Caddy can create and remove ACME DNS challenge records.</p>
       <p>The server installer asks for this token as the DNS API key.</p>
 
       <h2>5. Run server install</h2>
-      <pre><code>curl -fsSL https://pack.sh/server.sh | sudo PACK_DNS_PROVIDER=digitalocean sh</code></pre>
+      <p>SSH into the Droplet as root, then run:</p>
+      <pre><code>curl -fsSL https://pack.sh/server.sh | sudo env PACK_DNS_PROVIDER=digitalocean sh</code></pre>
+      <p>When the installer asks for the app domain, enter your apex domain, like <code>example.com</code>. When it asks for the DNS API key, paste the DigitalOcean token.</p>
+      <p>After the installer finishes, check that the deploy user works:</p>
+      <pre><code>ssh pack@example.com</code></pre>
+      <p>Use <code>example.com</code> as the deploy host during local install. The installer will save it as <code>pack@example.com</code>. Use <code>example.com</code> as the release domain.</p>
     </main>
   </body>
 </html>

@@ -11,13 +11,17 @@ if [ -z "$deploy_host" ]; then
     echo "PACK_DEPLOY_HOST is required when install is not attached to a terminal" >&2
     exit 1
   fi
-  printf "Deploy host, like pack@example.com: " > /dev/tty
+  printf "Deploy host, like example.com or pack@example.com: " > /dev/tty
   read -r deploy_host < /dev/tty
 fi
 if [ -z "$deploy_host" ]; then
   echo "deploy host is required" >&2
   exit 1
 fi
+case "$deploy_host" in
+  *@*) ;;
+  *) deploy_host="pack@$deploy_host" ;;
+esac
 
 if [ -z "$release_domain" ]; then
   if [ ! -r /dev/tty ]; then

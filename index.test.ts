@@ -406,7 +406,7 @@ test("createDeployPlan generates systemd, metadata, and supervisor commands", ()
     "rsync -P --stats --ignore-times --no-whole-file --inplace --rsync-path",
   );
   expect(formatDryRun(plan)).toContain(".pack/app pack@pack.sh:");
-  expect(formatDryRun(plan)).toContain("sftp put .pack/app pack@pack.sh:");
+  expect(formatDryRun(plan)).toContain("scp .pack/app pack@pack.sh:");
   expect(plan.systemdService).toContain("Description=pack release abc1234 for hello");
   expect(plan.systemdService).toContain("ExecStart=/var/pack/apps/hello/releases/abc1234/app");
   expect(plan.systemdService).toContain("EnvironmentFile=/run/pack/releases/abc1234.env");
@@ -425,7 +425,7 @@ test("createDeployPlan generates systemd, metadata, and supervisor commands", ()
 });
 
 test("createDeployPlan supports self-hosted deploy targets", () => {
-  process.env.PACK_DEPLOY_HOST = "pack@example.com";
+  process.env.PACK_DEPLOY_HOST = "example.com";
   process.env.PACK_RELEASE_DOMAIN = "example.com";
   const config: PackConfig = {
     name: "hello",

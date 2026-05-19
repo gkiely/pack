@@ -24,7 +24,6 @@
       <h2>1. Create the server</h2>
       <ul>
         <li>Use Ubuntu 24.04 LTS.</li>
-        <li>Add your SSH key to the root user during creation.</li>
         <li>Use a server with IPv4 enabled.</li>
       </ul>
 
@@ -50,10 +49,16 @@ A     *.example.com    YOUR_SERVER_IPV4</code></pre>
       <h2>4. Create a Vultr DNS token</h2>
       <p>The server uses Caddy with Vultr DNS for wildcard TLS certificates.</p>
       <p>In Vultr, go to Account, then API. Enable API access if needed, then copy your API key.</p>
+      <p>If API Access Control is enabled, allow the server's IPv4 address. Vultr API keys do not work until the calling IP is allowed.</p>
       <p>The server installer asks for this key as the DNS API key.</p>
 
       <h2>5. Run server install</h2>
-      <pre><code>curl -fsSL https://pack.sh/server.sh | sudo PACK_DNS_PROVIDER=vultr sh</code></pre>
+      <p>SSH into the server as root, then run:</p>
+      <pre><code>curl -fsSL https://pack.sh/server.sh | sudo env PACK_DNS_PROVIDER=vultr sh</code></pre>
+      <p>When the installer asks for the app domain, enter your apex domain, like <code>example.com</code>. When it asks for the DNS API key, paste the Vultr API key.</p>
+      <p>After the installer finishes, check that the deploy user works:</p>
+      <pre><code>ssh pack@example.com</code></pre>
+      <p>Use <code>example.com</code> as the deploy host during local install. The installer will save it as <code>pack@example.com</code>. Use <code>example.com</code> as the release domain.</p>
     </main>
   </body>
 </html>

@@ -41,10 +41,13 @@ switch ($Arch) {
 }
 
 if (-not $DeployHost) {
-  $DeployHost = Read-Host "Deploy host, like pack@example.com"
+  $DeployHost = Read-Host "Deploy host, like example.com or pack@example.com"
 }
 if (-not $DeployHost) {
   throw "deploy host is required"
+}
+if ($DeployHost -notmatch "@") {
+  $DeployHost = "pack@$DeployHost"
 }
 if ($DeployHost -notmatch '^[a-zA-Z0-9@._:-]+$' -or $DeployHost -match '^@|@$|::') {
   throw "invalid deploy host"

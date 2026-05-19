@@ -1,8 +1,7 @@
 import { $ } from "bun";
-import { parseSync } from "oxc-parser";
-import { Client, type ConnectConfig, type SFTPWrapper } from "ssh2";
-import { homedir, release } from "node:os";
-import { access, mkdir, readdir, readFile, stat } from "node:fs/promises";
+import { parse } from "acorn";
+import { release } from "node:os";
+import { access, mkdir, readdir, rm, stat } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { createInterface } from "node:readline/promises";
 
@@ -100,8 +99,13 @@ function andCommands(commands: string[]): string {
   return commands.join(" && ");
 }
 
+function normalizeDeployHost(target: string): string {
+  if (target.includes("@")) return target;
+  return `pack@${target}`;
+}
+
 function deployHost(): string {
-  return process.env.PACK_DEPLOY_HOST || process.env.PACK_HOST || DEFAULT_DEPLOY_HOST;
+  return normalizeDeployHost(process.env.PACK_DEPLOY_HOST || process.env.PACK_HOST || DEFAULT_DEPLOY_HOST);
 }
 
 function releaseDomain(): string {
@@ -184,7 +188,12 @@ function startsWithRelativeSpecifier(node: unknown): boolean {
 }
 
 function hasDynamicModuleImport(path: string, text: string, type: string): boolean {
-  const parsed = parseSync(path, text, { sourceType: "module" });
+  let parsed: unknown;
+  try {
+    parsed = parse(text, { ecmaVersion: "latest", sourceType: "module", allowHashBang: true });
+  } catch {
+    parsed = parse(text, { ecmaVersion: "latest", sourceType: "script", allowHashBang: true });
+  }
 
   function isRiskySpecifier(node: unknown): boolean {
     if (isStaticModuleSpecifier(node)) return false;
@@ -224,7 +233,7 @@ function hasDynamicModuleImport(path: string, text: string, type: string): boole
     return false;
   }
 
-  return visit(parsed.program);
+  return visit(parsed);
 }
 
 async function scanIgnoredDirs(root = process.cwd()): Promise<Set<string>> {
@@ -748,12 +757,12 @@ export function createDeployPlan(
 export function formatDryRun(plan: DeployPlan): string {
   const fallbackUpload =
     plan.mode === "static"
-      ? [`sftp put -r .pack/static/ ${plan.deployHost}:${plan.cachePath}/static/`]
+      ? [`scp -r .pack/static/. ${plan.deployHost}:${plan.cachePath}/static/`]
       : [
-          `sftp put ${plan.config.artifact} ${plan.deployHost}:${plan.cachePath}/app`,
+          `scp ${plan.config.artifact} ${plan.deployHost}:${plan.cachePath}/app`,
           ...plan.config.assets.map(
             (asset) =>
-              `sftp put -r ${asset.replace(/\/$/, "")}/ ${plan.deployHost}:${plan.cachePath}/assets/${basename(asset)}/`,
+              `scp -r ${asset.replace(/\/$/, "")}/. ${plan.deployHost}:${plan.cachePath}/assets/${basename(asset)}/`,
           ),
         ];
 
@@ -784,7 +793,7 @@ export function formatDryRun(plan: DeployPlan): string {
 
 export async function emitPlan(plan: DeployPlan, outDir: string): Promise<void> {
   const systemdDir = join(outDir, "systemd");
-  await $`mkdir -p ${systemdDir}`.quiet();
+  await mkdir(systemdDir, { recursive: true });
   if (plan.systemdService) {
     await Bun.write(join(systemdDir, `pack-${plan.releaseId}.service`), plan.systemdService);
   }
@@ -800,7 +809,7 @@ ${plan.remoteCommands.join("\n")}
 }
 
 async function build(plan: DeployPlan): Promise<void> {
-  await $`rm -rf .pack`.quiet();
+  await rm(".pack", { recursive: true, force: true });
   await mkdir(".pack", { recursive: true });
   await $`${plan.buildCommand}`.quiet();
 }
@@ -830,108 +839,19 @@ async function hasCommand(command: string): Promise<boolean> {
   return result.exitCode === 0;
 }
 
-async function readFirstExisting(paths: string[]): Promise<Buffer | undefined> {
-  for (const path of paths) {
-    try {
-      return Buffer.from(await readFile(path));
-    } catch {
-      // Try the next conventional key path.
-    }
-  }
-  return undefined;
+async function sshExec(target: string, script: string): Promise<void> {
+  await $`ssh ${target} sh -s < ${new Response(script)}`;
 }
 
-async function connectSsh(target: string): Promise<Client> {
-  const { username, host, port } = parseDeployTarget(target);
-  const connection = new Client();
-  const config: ConnectConfig = {
-    host,
-    port,
-    username,
-    agent: process.env.SSH_AUTH_SOCK,
-    privateKey: await readFirstExisting([
-      join(homedir(), ".ssh/id_ed25519"),
-      join(homedir(), ".ssh/id_rsa"),
-      join(homedir(), ".ssh/id_ecdsa"),
-    ]),
-    readyTimeout: 20_000,
-  };
-
-  return await new Promise((resolve, reject) => {
-    connection
-      .once("ready", () => resolve(connection))
-      .once("error", reject)
-      .connect(config);
-  });
-}
-
-async function execScript(connection: Client, script: string): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
-    connection.exec("sh -s", (error, stream) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-
-      let stderr = "";
-      stream
-        .on("close", (code: string | number | null) => {
-          if (Number(code) === 0) {
-            resolve();
-          } else {
-            reject(new Error(stderr.trim() || `remote script exited with ${code}`));
-          }
-        })
-        .stderr.on("data", (chunk: Buffer) => {
-          stderr += chunk.toString();
-          process.stderr.write(chunk);
-        });
-
-      stream.on("data", (chunk: Buffer) => process.stdout.write(chunk));
-      stream.end(script);
-    });
-  });
-}
-
-async function openSftp(connection: Client): Promise<SFTPWrapper> {
-  return await new Promise((resolve, reject) => {
-    connection.sftp((error, sftp) => {
-      if (error) reject(error);
-      else resolve(sftp);
-    });
-  });
-}
-
-async function sftpMkdir(sftp: SFTPWrapper, path: string): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
-    sftp.mkdir(path, (error) => {
-      if (!error || String((error as NodeJS.ErrnoException).code) === "4") {
-        resolve();
-      } else {
-        reject(error);
-      }
-    });
-  });
-}
-
-async function sftpFastPut(sftp: SFTPWrapper, localPath: string, remotePath: string): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
-    sftp.fastPut(localPath, remotePath, (error) => {
-      if (error) reject(error);
-      else resolve();
-    });
-  });
-}
-
-async function uploadDirectory(sftp: SFTPWrapper, localDir: string, remoteDir: string): Promise<void> {
-  await sftpMkdir(sftp, remoteDir);
+async function uploadDirectoryWithScp(target: string, localDir: string, remoteDir: string): Promise<void> {
+  await sshExec(target, `set -eu\nmkdir -p ${shellQuote(remoteDir)}\n`);
   for (const entry of await readdir(localDir, { withFileTypes: true })) {
     const localPath = join(localDir, entry.name);
     const remotePath = `${remoteDir}/${entry.name}`;
     if (entry.isDirectory()) {
-      await uploadDirectory(sftp, localPath, remotePath);
+      await uploadDirectoryWithScp(target, localPath, remotePath);
     } else if (entry.isFile()) {
-      await sftpFastPut(sftp, localPath, remotePath);
+      await $`scp ${localPath} ${`${target}:${remotePath}`}`;
     }
   }
 }
@@ -944,34 +864,30 @@ async function uploadWithRsync(plan: DeployPlan): Promise<void> {
   await $`ssh ${plan.deployHost} sh -s < ${new Response(`set -eu\n\n${plan.remoteCommands.join("\n")}\n`)}`;
 }
 
-async function uploadWithSftp(plan: DeployPlan): Promise<void> {
-  const connection = await connectSsh(plan.deployHost);
-  try {
-    await execScript(connection, `set -eu\n\n${plan.preUploadRemoteCommands.join("\n")}\n`);
+async function uploadWithScp(plan: DeployPlan): Promise<void> {
+  await sshExec(plan.deployHost, `set -eu\n\n${plan.preUploadRemoteCommands.join("\n")}\n`);
 
-    const sftp = await openSftp(connection);
-    if (plan.mode === "static") {
-      await uploadDirectory(sftp, ".pack/static", `${plan.cachePath}/static`);
-    } else {
-      await sftpFastPut(sftp, plan.config.artifact, `${plan.cachePath}/app`);
-      for (const asset of plan.config.assets) {
-        const localDir = asset.replace(/\/$/, "");
-        await uploadDirectory(sftp, localDir, `${plan.cachePath}/assets/${basename(asset)}`);
-      }
+  if (plan.mode === "static") {
+    await uploadDirectoryWithScp(plan.deployHost, ".pack/static", `${plan.cachePath}/static`);
+  } else {
+    await $`scp ${plan.config.artifact} ${`${plan.deployHost}:${plan.cachePath}/app`}`;
+    for (const asset of plan.config.assets) {
+      const localDir = asset.replace(/\/$/, "");
+      await uploadDirectoryWithScp(plan.deployHost, localDir, `${plan.cachePath}/assets/${basename(asset)}`);
     }
-
-    await execScript(connection, `set -eu\n\n${plan.remoteCommands.join("\n")}\n`);
-  } finally {
-    connection.end();
   }
+
+  await sshExec(plan.deployHost, `set -eu\n\n${plan.remoteCommands.join("\n")}\n`);
 }
 
 async function deploy(plan: DeployPlan): Promise<void> {
-  const [hasRsync, hasSsh] = await Promise.all([hasCommand("rsync"), hasCommand("ssh")]);
+  const [hasRsync, hasSsh, hasScp] = await Promise.all([hasCommand("rsync"), hasCommand("ssh"), hasCommand("scp")]);
   if (hasRsync && hasSsh) {
     await uploadWithRsync(plan);
+  } else if (hasSsh && hasScp) {
+    await uploadWithScp(plan);
   } else {
-    await uploadWithSftp(plan);
+    throw new Error("pack deploy requires ssh and scp, or ssh and rsync");
   }
 }
 
