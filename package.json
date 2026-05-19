@@ -2,6 +2,7 @@
   "name": "pack",
   "module": "index.ts",
   "type": "module",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "start": "bun scripts/start-site.ts",
